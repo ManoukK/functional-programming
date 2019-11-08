@@ -1,3 +1,4 @@
+//De meeste stukjes code heb ik geleerd van NDM
 var prijzenLijst = `1,65
 2,25
 1,35
