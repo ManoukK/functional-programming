@@ -45,7 +45,7 @@ prijzenLijst.forEach(prijs => {
   totaalPrijs = totaalPrijs + prijs
   //hier print ik het uit in html zodat het makkelijk te zien is voor anderen
   console.log(totaalPrijs);
-    // hier heeft mohammad me ermee geholpen! nu komen mijn resultaten op de site te staan
+    // hier heeft mohamad me ermee geholpen! nu komen mijn resultaten op de site te staan
     var pElement = document.createElement('p');
     pElement.textContent = totaalPrijs;
     divContainer.appendChild(pElement);
