@@ -1,0 +1,67 @@
+<!--- http://bl.ocks.org/ganeshv/2b852863d91ee21ddf71 --->
+<html>
+<head>
+<!DOCTYPE html>
+<!--
+
+World map chloropleth, based on http://bl.ocks.org/jasondavies/4188334
+and https://www.jasondavies.com/maps/rotate/. Colors by Cynthia Brewer
+http://colorbrewer.org
+
+This template takes a list of Javascript objects, e.g.
+    [ { "country": "Afghanistan", "data": 123, "foo": "some other field" },
+      { "country": 365, "data": 234, "bar": "yet another field" },
+      ...
+    ]
+
+Template options:
+title:      Title of map
+projection: Projection type - valid values are "orthographic", "kavrayskiy".
+field:      Object field to treat as data [default: data]
+country:    Object field to treat as country [default: country]
+colors: Colorbrewer scale (see samples at http://bl.ocks.org/mbostock/5577023), default: RdYlGn
+inverse:    Invert color scale (lower numbers are better/greener)
+
+Countries may be specified by name, ISO 3166-1 two-letter, three-letter or
+numeric code. We use data from https://github.com/mledoze/countries.git
+
+Data is coerced into numeric form, ignored if null.
+
+Orthographic projection can be zoomed by scroll-wheel and manipulated by
+dragging.
+
+Examples:
+
+cat http://en.wikipedia.org/wiki/List_of_countries_by_literacy_rate | table2js -e "table.wikitable tr" country foo bar data | jf 'x.country = x.country.trim(), x.data = +x.data.replace(/%/, ""), x.data < 0 ? undefined : x' | iframe -o title="Adult Literacy (%)" -g /usr/share/template/d3-worldmap1
+
+Tests:
+echo '[{"country": 356, "data": 100}, {"country": "Antarctica", "data": 0}]'| jf '$.parseJSON(x)' | iframe -g /usr/share/template/d3-worldmap1
+-->
+
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+
+    <div id="container">
+        <div id="footer">
+        <input id="rotstate" type="checkbox" name="rotstate" value="true">Spin</input>
+        <div class="hint">mousewheel to zoom, drag to rotate</div>
+        </div>
+    </div>
+
+
+<script src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/d3.v3.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/d3.geo.projection.v0.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/topojson.v1.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/colorbrewer.v1.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/queue.v1.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/d3.geo.zoom.js"></script>
+<script src="script.js"></script>
+
+</body>
+
+
+</html>
