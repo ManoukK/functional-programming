@@ -42,7 +42,9 @@ ORDER BY DESC(?choCount)`
 
 var url = "https://api.data.netwerkdigitaalerfgoed.nl/datasets/ivo/NMVW/services/NMVW-13/sparql";
 
+// hier begint het fetchen
 // async function https://gist.github.com/msmfsd/fca50ab095b795eb39739e8c4357a808
+// veel hulp gekregen van Robert
 async function fetchAsync () {
     // await response of fetch call
     let response = await fetch(url+"?query="+ encodeURIComponent(query) +"&format=json");
@@ -52,6 +54,7 @@ async function fetchAsync () {
     // only proceed once promise is resolved
     let data = await response.json();
 
+    
     // only proceed once second promise is resolved
     return data;
   }
@@ -59,11 +62,21 @@ async function fetchAsync () {
 // trigger async function
 // log response or catch error of fetch promise
 fetchAsync()
-    .then(data => console.log(data))
+    .then(json => json.results.bindings)
+    .then(results => {
+    //TODO: clean up results in separate function
+    	results.forEach(result => {
+        result.count = Number(result.choCount.value)
+        //result.long = Number(result.long.value)
+      })    
+
+    //.then(data => console.log(data))
     .catch(reason => console.log(reason.message))
 
+var results = resultatenQuery
 //de function moet je hier nog aanroepen
 fetchAsync;
+//hier eindigt de fetch
 
 // window.addEventListener('message', function(e) {
 //     var opts = e.data.opts,
@@ -72,7 +85,7 @@ fetchAsync;
 //     return main(opts, data);
 // });
 
-function main(o, data, query) {
+function main(o, data) {
     var opts = $.extend({}, defaults, o),
         colorscale = opts.colors,
         field = opts.field;
@@ -195,7 +208,7 @@ queue()
     .await(loaded);
 
 //hier word csv getransformeerd en worden er locaties aan gegeven
-function loaded(err, world, countrydb, query) {
+function loaded(err, world, countrydb,) {
     var countries = topojson.feature(world, world.objects.countries).features;
     data = data.map(function(x) {
         var c = x[opts.country];
@@ -282,9 +295,10 @@ function loaded(err, world, countrydb, query) {
 
 
 if (window.location.hash === "") {
-d3.csv("queryResults.csv", function (err, data,) {
-    main({}, data);
-    console.log(d3.csv);
-    console.log("hoi");
-});
-}
+d3.json(resultatenQuery, function (err, data,) {
+    main({}, data)
+    console.log(data)
+    console.log("hoi")
+    })
+};
+
