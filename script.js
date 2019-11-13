@@ -5,7 +5,7 @@ height = 500,
 sheight = 550;
 
 //draaien van de map
-// var speed = 1.0,
+// var speed = 1.0,s
 // rotating = false;
 
 var defaults= {
@@ -17,15 +17,62 @@ proj: "kavrayskiy",
 inverse: ""
 };
 
-window.addEventListener('message', function(e) {
-    var opts = e.data.opts,
-        data = e.data.data;
+var query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX edm: <http://www.europeana.eu/schemas/edm/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX hdlh: <https://hdl.handle.net/20.500.11840/termmaster>
+PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX gn: <http://www.geonames.org/ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-    return main(opts, data);
-});
+SELECT ?landLabel (COUNT(?cho) AS ?choCount) WHERE {
+  
+   ?cho dct:spatial ?plaats .
+   ?plaats skos:exactMatch/gn:parentCountry ?land .
+   ?land gn:name ?landLabel .
+  
+} GROUP BY ?landLabel
+ORDER BY DESC(?choCount)`
 
+var url = "https://api.data.netwerkdigitaalerfgoed.nl/datasets/ivo/NMVW/services/NMVW-13/sparql";
 
-function main(o, data) {
+// async function https://gist.github.com/msmfsd/fca50ab095b795eb39739e8c4357a808
+async function fetchAsync () {
+    // await response of fetch call
+    let response = await fetch(url+"?query="+ encodeURIComponent(query) +"&format=json");
+
+    console.log(response.url);
+
+    // only proceed once promise is resolved
+    let data = await response.json();
+
+    // only proceed once second promise is resolved
+    return data;
+  }
+
+// trigger async function
+// log response or catch error of fetch promise
+fetchAsync()
+    .then(data => console.log(data))
+    .catch(reason => console.log(reason.message))
+
+//de function moet je hier nog aanroepen
+fetchAsync;
+
+// window.addEventListener('message', function(e) {
+//     var opts = e.data.opts,
+//         data = e.data.data;
+
+//     return main(opts, data);
+// });
+
+function main(o, data, query) {
     var opts = $.extend({}, defaults, o),
         colorscale = opts.colors,
         field = opts.field;
@@ -97,11 +144,13 @@ data = data.map(function(d) {
 var datadomain = d3.extent(data.map(function(x) { return x[field]; })),
     colors = d3.scale.quantize()
                 .domain(opts.inverse ? [datadomain[1], datadomain[0]] : datadomain)
-                .range(colorbrewer[colorscale][9]);
+                .range(["#ff78cb", "#f295cd", "#e2adce", "#d0c3d0", "#bad8d1", "#9fecd3", "#78ffd4"]);
 
 var x = d3.scale.linear()
-            .domain(datadomain)
-            .range([0, 240]);
+            //.domain(datadomain)
+            .domain([0, 300000])
+            //.range([0, 240]);
+            .range([0, 240])
 
 var tf = ".0f",
     tsign = "",
@@ -145,7 +194,8 @@ queue()
     .defer(d3.json, "http://pigshell.com/common/d3.v3/countries.json")
     .await(loaded);
 
-function loaded(err, world, countrydb) {
+//hier word csv getransformeerd en worden er locaties aan gegeven
+function loaded(err, world, countrydb, query) {
     var countries = topojson.feature(world, world.objects.countries).features;
     data = data.map(function(x) {
         var c = x[opts.country];
@@ -230,9 +280,11 @@ function loaded(err, world, countrydb) {
 }
 }
 
+
 if (window.location.hash === "") {
-d3.csv("queryResults.csv", function(err, data) {
+d3.csv("queryResults.csv", function (err, data,) {
     main({}, data);
-    console.log(ds.csv);
+    console.log(d3.csv);
+    console.log("hoi");
 });
 }
