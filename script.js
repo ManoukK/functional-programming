@@ -232,8 +232,8 @@ function nextFunction(results, o,){
 
     
     queue()
-        .defer(d3.json, "http://pigshell.com/common/d3.v3/world-110m.json")
-        .defer(d3.json, "http://pigshell.com/common/d3.v3/countries.json")
+        .defer(d3.json, "https://pigshell.com/common/d3.v3/world-110m.json")
+        .defer(d3.json, "https://pigshell.com/common/d3.v3/countries.json")
         .await(loaded);
 
 //hier word csv getransformeerd en worden er locaties aan gegeven
