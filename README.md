@@ -20,8 +20,12 @@ Mijn doelgroep mijn de bezoekers van de tentoonstelling van Rick. Ik wilde graag
 #### Het resultaat
 
 ## Installatie
+De template die ik heb gebruikt is deze: http://bl.ocks.org/ganeshv/2b852863d91ee21ddf71 het is van de gebruiker ganeshv en hij heeft het heel goed uitgelegt hoe de kaart werkt. Hij heeft gelijk alle script tags erin die je nodig hebt en hij laat zien hoe hij de landen ophaalt. 
+
+(script tags)
 
 ## Data
+(query)
 
 ## features
 
