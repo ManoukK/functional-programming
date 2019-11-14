@@ -123,8 +123,12 @@ Dit zijn de features die ik nog wil toepassen of die ik al heb toegepast:
 ## Credits voor:
 #### conpect hulp:
 - Cindy Danny die aangaven dat het interessanter was om objecten te tonen die bijna niet in het museum staan. 
+- Roy heeft mij feedback gegeven aan de hand van de rubrik. Erg veel aan gehad
 
 #### techniek hulp:
 - Ivo voor de query 
 - Laurens voor de voorbeelden 
 - Robert voor hulp met code
+- Hulp gekregen van Lennart
+- Hulp gekregen van Mohammad
+- Hulp van Kim die met mij mee dacht als het even mis ging 
