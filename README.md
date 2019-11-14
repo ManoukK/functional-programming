@@ -17,12 +17,26 @@ Mijn doelgroep mijn de bezoekers van de tentoonstelling van Rick. Ik wilde graag
 #### Een voorbeeld foto van hoe ik het wil krijgen
 ![Schermafbeelding 2019-11-08 om 10 00 42](https://user-images.githubusercontent.com/45541885/68839196-7682ea00-06c0-11ea-8fc8-41d94b27cec6.png)
 
-#### Het resultaat
+#### Het resultaat (tot nu toe, donderdag 14-11-19)
+![Schermafbeelding 2019-11-14 om 22 29 19](https://user-images.githubusercontent.com/45541885/68897660-42461280-072e-11ea-9888-4b2e612b73f3.png)
+
 
 ## Installatie
-De template die ik heb gebruikt is deze: http://bl.ocks.org/ganeshv/2b852863d91ee21ddf71 het is van de gebruiker ganeshv en hij heeft het heel goed uitgelegt hoe de kaart werkt. Hij heeft gelijk alle script tags erin die je nodig hebt en hij laat zien hoe hij de landen ophaalt. 
+De template die ik heb gebruikt is deze: http://bl.ocks.org/ganeshv/2b852863d91ee21ddf71 het is van de gebruiker ganeshv en hij heeft het heel goed uitgelegt hoe de kaart werkt. Hij heeft gelijk alle script tags erin die je nodig hebt en hij laat zien hoe hij de landen ophaalt. Dat ziet er zo uit: https://github.com/mledoze/countries (link is via de code pagina van ganeshv)
 
-(script tags)
+Dit zijn alle tags die je nodig hebt. Hier word een d3 wereld kaart, d3 zelf, jquery, een color pallette en een zoom animatie geinstalleerd. Deze tags moeten in je html staan. 
+
+```
+<script src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/d3.v3.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/d3.geo.projection.v0.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/topojson.v1.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/colorbrewer.v1.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/queue.v1.min.js"></script>
+<script src="http://pigshell.com/common/d3.v3/d3.geo.zoom.js"></script>
+
+<script src="script.js"></script> //eigen .js bestand
+```
 
 ## Data
 #### De collectie
@@ -57,6 +71,10 @@ SELECT ?landLabel (COUNT(?cho) AS ?choCount) WHERE {
   
 } GROUP BY ?landLabel
 ORDER BY DESC(?choCount)
+```
+En dit is de endpoint die ik heb gebruikt: 
+```
+var url = "https://api.data.netwerkdigitaalerfgoed.nl/datasets/ivo/NMVW/services/NMVW-13/sparql";
 ```
 De array die je terug krijgt als je dit om heb gezet in JSON ziet er zo uit: 
 ![Schermafbeelding 2019-11-14 om 20 49 35](https://user-images.githubusercontent.com/45541885/68891050-669af280-0720-11ea-99a6-fe90da9e030f.png)
