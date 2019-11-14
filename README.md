@@ -91,10 +91,9 @@ Later in de code word er verwacht dat je in je array items hebt zitten met bepaa
 De nieuwe array ziet er in de console nu zo uit:
 ![Schermafbeelding 2019-11-14 om 21 02 30](https://user-images.githubusercontent.com/45541885/68892221-c5fa0200-0722-11ea-8a4b-416142a98faf.png)
 
-#### Aangepaste query
-
-
 ## features
+Dit zijn de features die ik nog wil toepassen of die ik al heb toegepast:
+[]
 
 ## Credits voor:
 #### conpect hulp:
