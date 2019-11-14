@@ -8,14 +8,15 @@ sheight = 550;
 // var speed = 1.0,s
 // rotating = false;
 
-var defaults= {
-title: "",
-field: "choCount",
-country: "landLabel",
-colors: "RdYlGn",
-proj: "kavrayskiy",
-inverse: ""
-};
+// var defaults= {
+// title: "",                                               
+// field: "choCount",
+// country: "landLabel",
+// colors: "RdYlGn",
+// proj: "kavrayskiy",
+// inverse: ""
+// };
+
 
 var query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -44,7 +45,7 @@ var url = "https://api.data.netwerkdigitaalerfgoed.nl/datasets/ivo/NMVW/services
 
 // hier begint het fetchen
 // async function https://gist.github.com/msmfsd/fca50ab095b795eb39739e8c4357a808
-// veel hulp gekregen van Robert
+// veel hulp van robert gekregen
 async function fetchAsync () {
     // await response of fetch call
     let response = await fetch(url+"?query="+ encodeURIComponent(query) +"&format=json");
@@ -52,40 +53,64 @@ async function fetchAsync () {
     console.log(response.url);
 
     // only proceed once promise is resolved
-    let data = await response.json();
+    let dataQuery = await response.json();
 
-    
     // only proceed once second promise is resolved
-    return data;
+    return dataQuery;
   }
 
 // trigger async function
 // log response or catch error of fetch promise
+// code dankzij laurens
 fetchAsync()
     .then(json => json.results.bindings)
     .then(results => {
-    //TODO: clean up results in separate function
-    	results.forEach(result => {
-        result.count = Number(result.choCount.value)
-        //result.long = Number(result.long.value)
-      })    
+        return results.map(result => {
+            return {
+                //in nummers gekregen dankzij Lennart
+                count: result.choCount.value,
+                land: result.landLabel.value,
+            }
+        })
+    })
 
-    //.then(data => console.log(data))
+    .then(results => {
+        console.log(results)
+        //dit zorgt ervoor dat ik met de resultaten verder kan werken
+        nextFunction(results)
+    })
     .catch(reason => console.log(reason.message))
 
-var results = resultatenQuery
-//de function moet je hier nog aanroepen
 fetchAsync;
+
 //hier eindigt de fetch
 
-// window.addEventListener('message', function(e) {
-//     var opts = e.data.opts,
-//         data = e.data.data;
 
-//     return main(opts, data);
-// });
+function nextFunction(results, o,){
 
-function main(o, data) {
+    // //hier trek ik mijn array los met alleen de landen en alleen counts als strings (dankzij Lennart!)
+    // var landArray = results.map(result => result.land);
+    // console.log(landArray);
+
+    // var countArray = results.map(result => result.count);
+    // console.log(countArray);
+
+    // console.log(results.result);
+
+   var defaults = results.map(result => {
+       return {
+        title: "",                                               
+        field: result.count,
+        country: result.land,
+        colors: "RdYlGn",
+        proj: "kavrayskiy",
+        inverse: "",
+       }
+    });
+
+    console.log(defaults);
+
+
     var opts = $.extend({}, defaults, o),
         colorscale = opts.colors,
         field = opts.field;
@@ -115,168 +140,187 @@ function main(o, data) {
             'projection': ortho,
             'outline_datum': {type: "Sphere"}
         }
-};
+    };
 
-var projtype = projections[opts.proj] ? opts.proj : "kavrayskiy";
+    var projtype = projections[opts.proj] ? opts.proj : "kavrayskiy";
 
-var projection = projections[projtype]['projection'];
+    var projection = projections[projtype]['projection'];
 
-var path = d3.geo.path()
-    .projection(projection);
+    var path = d3.geo.path()
+        .projection(projection);
 
-var svg = d3.select("#container").append("svg")
-    .attr("width", width)
-    .attr("height", sheight);
+    var svg = d3.select("#container").append("svg")
+        .attr("width", width)
+        .attr("height", sheight);
 
-var tooltip = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
+    var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
 
-svg.append("path")
-    .datum(projections[projtype]['outline_datum']) 
-    .attr("class", "sea foreground")
-    .attr("d", path);
+    svg.append("path")
+        .datum(projections[projtype]['outline_datum']) 
+        .attr("class", "sea foreground")
+        .attr("d", path);
 
-svg.append("path")
-    .datum(graticule)
-    .attr("class", "graticule")
-    .attr("d", path);
+    svg.append("path")
+        .datum(graticule)
+        .attr("class", "graticule")
+        .attr("d", path);
 
-svg.append("path")
-    .datum(projections[projtype]['outline_datum'])
-    .attr("class", "outline foreground")
-    .attr("d", path);
+    svg.append("path")
+        .datum(projections[projtype]['outline_datum'])
+        .attr("class", "outline foreground")
+        .attr("d", path);
 
-data = data.map(function(d) {
+    data = defaults.map(function(d) {
+        //console.log(d)
+        //console.log(d.field)
         d[field] = (d[field] === undefined || isNaN(+d[field])) ? null : +d[field];
         return d;
-    }).filter(function(d) {
-        return d[field] !== null;
-    });
+        }).filter(function(d) {
+            return d[field] !== null;
+        });
 
-var datadomain = d3.extent(data.map(function(x) { return x[field]; })),
-    colors = d3.scale.quantize()
-                .domain(opts.inverse ? [datadomain[1], datadomain[0]] : datadomain)
-                .range(["#ff78cb", "#f295cd", "#e2adce", "#d0c3d0", "#bad8d1", "#9fecd3", "#78ffd4"]);
+    var datadomain = d3.extent(defaults.map(function(legenda) { return legenda[field]; })),
+        colors = d3.scale.quantize()
+            .domain(opts.inverse ? [datadomain[1], datadomain[0]] : datadomain)
+            .range(["#ff78cb", "#f295cd", "#e2adce", "#d0c3d0", "#bad8d1", "#9fecd3", "#78ffd4"]);
 
-var x = d3.scale.linear()
-            //.domain(datadomain)
-            .domain([0, 300000])
-            //.range([0, 240]);
-            .range([0, 240])
+    var legenda = d3.scale.linear()
+        //.domain(datadomain)
+        .domain([0, 300000])
+        //.range([0, 240]);
+        .range([0, 240])
 
-var tf = ".0f",
-    tsign = "",
-    drange = datadomain[1] - datadomain[0];
-if (datadomain[0] < 0) {
-    tsign = "+";
-}
-if (drange <= 2.0) {
-    tf = ".2f";
-} else if (drange < 10.0) {
-    tf = ".1f";
-}
+    var tf = ".0f",
+        tsign = "",
+        drange = datadomain[1] - datadomain[0];
     
-var xAxis = d3.svg.axis()
-    .orient("bottom")
-    .scale(x)
-    .tickSize(13)
-    .tickFormat(d3.format(tsign + tf));
+    if (datadomain[0] < 0) {
+        tsign = "+";
+    }
 
-var xbar = svg.append("g")
-            .attr("transform", "translate(" + (width / 2 - 120) + "," + (sheight - 30) + ")")
-            .attr("class", "key");
+    if (drange <= 2.0) {
+     tf = ".2f";
+    } else if (drange < 10.0) {
+        tf = ".1f";
+    }
+    
+    var xAxis = d3.svg.axis()
+        .orient("bottom")
+        .scale(legenda)
+        .tickSize(13)
+        .tickFormat(d3.format(tsign + tf));
 
-xbar.selectAll("rect")
-        .data(d3.pairs(x.ticks(10)))
-    .enter().append("rect")
+    var xbar = svg.append("g")
+        .attr("transform", "translate(" + (width / 2 - 120) + "," + (sheight - 30) + ")")
+        .attr("class", "key");
+
+    xbar.selectAll("rect")
+        .data(d3.pairs(legenda.ticks(10)))
+        .enter().append("rect")
         .attr("height", 8)
-        .attr("x", function(d) { return x(d[0]); })
-        .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+        .attr("x", function(d) { return legenda(d[0]); })
+        .attr("width", function(d) { return legenda(d[1]) - legenda(d[0]); })
         .style("fill", function(d) { return colors(d[0]); });
 
-xbar.call(xAxis).append("text")
-    .attr("class", "caption")
-    .attr("y", -6)
-    .attr("x", x(x.ticks(10)[0]))
-    .text(opts.title);
+    xbar.call(xAxis).append("text")
+        .attr("class", "caption")
+        .attr("y", -6)
+        .attr("x", legenda(legenda.ticks(10)[0]))
+        .text(opts.title);
 
     
-queue()
-    .defer(d3.json, "http://pigshell.com/common/d3.v3/world-110m.json")
-    .defer(d3.json, "http://pigshell.com/common/d3.v3/countries.json")
-    .await(loaded);
+    queue()
+        .defer(d3.json, "http://pigshell.com/common/d3.v3/world-110m.json")
+        .defer(d3.json, "http://pigshell.com/common/d3.v3/countries.json")
+        .await(loaded);
 
 //hier word csv getransformeerd en worden er locaties aan gegeven
-function loaded(err, world, countrydb,) {
+function loaded(err, world, countrydb) {
+    
+    console.log("test")
+
     var countries = topojson.feature(world, world.objects.countries).features;
-    data = data.map(function(x) {
-        var c = x[opts.country];
-        if (c === undefined) {
+
+    //Hier was een error die kim heeft gefixt (data.map moets results.map worden)
+    data = defaults.map(function(land) {
+        var naamLand = land.country;
+    
+        if (naamLand === undefined) {
             return {};
         }
-        if (!isNaN(+c)) {
-            c = c.toString();
+        if (!isNaN(+naamLand)) {
+            naamLand = naamLand.toString();
         }
-        if (typeof c === 'string' || c instanceof String) {
-            c = c.trim();
-            var cl = c.toLowerCase();
-            var clist = countrydb.filter(function(i) {
+        if (typeof naamLand === 'string' ||naamLand instanceof String) {
+            naamLand = naamLand.trim();
+            var cl = naamLand.toLowerCase();
+            var naamLandLijst = countrydb.filter(function(i) {
                 return i["name"].toLowerCase() === cl ||
-                    i["cca3"] === c || i["cca2"] === c ||
+                    i["cca3"] === naamLand || i["cca2"] === naamLand ||
                     i["nativeName"] === cl ||
-                    +i["ccn3"] === +c || 
-                    i["altSpellings"].indexOf(c) !== -1;
+                    +i["ccn3"] === +naamLand || 
+                    i["altSpellings"].indexOf(naamLand) !== -1;
             });
-            x["_id"] = clist.length ? +clist[0]["ccn3"] : -1;
-        } else {
-            x["_id"] = -1;
-        }
-        return x;
-    });
+            land["_id"] = naamLandLijst.length ? +naamLandLijst[0]["ccn3"] : -1;
+            } else {
+                land["_id"] = -1;
+            }
+            return land;
+        });
 
-    countries = countries.map(function(c) {
-        c.properties["_data"] = data.filter(function(x) { return x["_id"] === c.id; })[0];
-        c.properties["_country"] = countrydb.filter(function(x) { return +x["ccn3"] === c.id; })[0];
-        return c;
-    });
+        countries = countries.map(function(naamLand) {
+            //console.log(naamLand)
+            naamLand.properties["_data"] = defaults.filter(function(landNaamOmzetten) { return landNaamOmzetten["field"] === naamLand.field; })[0];
+            naamLand.properties["_country"] = countrydb.filter(function(landNaamOmzetten) { return +landNaamOmzetten["ccn3"] === naamLand.id; })[0];
+            // console.log(naamLand)
+            return naamLand;
+        });
 
-    svg.selectAll(".country")
+        //hier zit de animatie in met het hoveren
+        svg.selectAll(".country")
             .data(countries)
-        .enter().insert("path", ".outline")
-        .attr("class", "country foreground")
-        .attr("d", path)
-        .style("fill", function(d, i) {
-            return (d.properties["_data"] && d.properties["_data"][field] !== null) ? colors(d.properties["_data"][field]) : '#f8f8f8';
-        })
-        .on("mouseover", function(d) {
-            tooltip.transition()
+            .enter().insert("path", ".outline")
+            .attr("class", "country foreground")
+            .attr("d", path)
+            .style("fill", function(landKleurenFill, i) {
+                console.log(landKleurenFill)
+                //console.log(landKleurenFill.properties["_data"])
+                return (landKleurenFill.properties["_data"] && landKleurenFill.properties["_data"][field] !== null) ? colors(landKleurenFill.properties["_data"][field]) : '#f8f8f8';
+            })
+            .on("mouseover", function(popup) {
+                console.log(str)
+                tooltip.transition()
                 .duration(200)
                 .style("opacity", 0.9);
-            var str = d.properties["_country"] ? d.properties["_country"].name : "Unknown";
-            str += (d.properties["_data"] && d.properties["_data"][field] !== null) ? ": " + d.properties["_data"][field] : "";
-            tooltip.html(str)
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 30) + "px");
-        })
-        .on("mouseout", function(d) {
-            tooltip.transition()
+                
+                var str = popup.properties["_country"] ? popup.properties["_country"].name : "Unknown";
+                str += (popup.properties["_data"] && popup.properties["_data"][field] !== null) ? ": " + popup.properties["_data"][field] : "";
+                tooltip.html(str)
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - 30) + "px");
+            })
+            .on("mouseout", function(popupWeg) {
+                tooltip.transition()
                 .duration(500)
                 .style("opacity", 0);
-        });
-    if (projtype === 'orthographic') {
-        d3.select("#footer").style("visibility", "visible");
-        d3.select("#rotstate")
-            .on("change", function() {
-                rotating = d3.select(this).property('checked');
             });
-        svg.selectAll(".foreground")
-            .call(d3.geo.zoom().projection(projection)
-            .scaleExtent([projection.scale() * .7, projection.scale() * 10])
-            .on("zoom.redraw", function() {
-                d3.event.sourceEvent.preventDefault();
-                svg.selectAll("path").attr("d", path);
-            }));
+
+
+        if (projtype === 'orthographic') {
+            d3.select("#footer").style("visibility", "visible");
+            d3.select("#rotstate")
+                .on("change", function() {
+                    rotating = d3.select(this).property('checked');
+                });
+            svg.selectAll(".foreground")
+                .call(d3.geo.zoom().projection(projection)
+                .scaleExtent([projection.scale() * .7, projection.scale() * 10])
+                .on("zoom.redraw", function() {
+                    d3.event.sourceEvent.preventDefault();
+                    svg.selectAll("path").attr("d", path);
+                }));
         // d3.timer(function() {
         //     if (!rotating) {
         //         return;
@@ -291,14 +335,5 @@ function loaded(err, world, countrydb,) {
         window.parent.postMessage({height: myheight}, '*');
     }
 }
+
 }
-
-
-if (window.location.hash === "") {
-d3.json(resultatenQuery, function (err, data,) {
-    main({}, data)
-    console.log(data)
-    console.log("hoi")
-    })
-};
-
