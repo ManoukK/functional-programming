@@ -25,7 +25,74 @@ De template die ik heb gebruikt is deze: http://bl.ocks.org/ganeshv/2b852863d91e
 (script tags)
 
 ## Data
-(query)
+#### De collectie
+Voor de data heb ik gewerkt met de database/collectie van het Tropen museum. De collectie is ontzettend groot. Het bevat objecten en foto's vanuit de hele wereld. De collectie is voornamelijk gebaseerd op de mens. Je vind veel culturen, geloven en bevolkingsgroepen. De categoriën die er in de collectie zitten zijn heel breed tot heel specifiek. Je kan hierin echt gaat inzoomen op wat jij precies wilt hebben. 
+
+#### Wat heb ik ermee gedaan?
+Zoals je in mijn concept al kon lezen wilde ik wat doen met de hele collectie, met de landen en het aantal objecten erin. Ik heb dus een query gebruikt (zie hieronder en geschreven door Ivo) die alle landen ophaalt die in de database zijn vermeld. Vervolgens kijkt de query ook hoeveel objecten er aan dat land hangen. Door het land mee te krijgen kan ik dit op een wereld kaart zetten in d3. De grootte van het aantal objecten zorgen ervoor welke tint kleur er word mee gegeven. 
+
+#### De query uit sparql
+Dit is de qeury uit uit sparqle die ik gebruik. De prefixes zijn nodig om benodigde data op te halen, om errors te voorkomen en om dingen te definiëren. 
+
+```
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX edm: <http://www.europeana.eu/schemas/edm/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX hdlh: <https://hdl.handle.net/20.500.11840/termmaster>
+PREFIX wgs84: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX gn: <http://www.geonames.org/ontology#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?landLabel (COUNT(?cho) AS ?choCount) WHERE {
+  
+   ?cho dct:spatial ?plaats .
+   ?plaats skos:exactMatch/gn:parentCountry ?land .
+   ?land gn:name ?landLabel .
+  
+} GROUP BY ?landLabel
+ORDER BY DESC(?choCount)
+```
+De array die je terug krijgt als je dit om heb gezet in JSON ziet er zo uit: 
+![Schermafbeelding 2019-11-14 om 20 49 35](https://user-images.githubusercontent.com/45541885/68891050-669af280-0720-11ea-99a6-fe90da9e030f.png)
+
+Je ziet dat de values nog heel "diep" in de arrey items zitten. Uiteindelijk wil je makkelijk bij de values van de landen en de objecten komen. Dit heb ik opgelost om deze code mee te geven bij mijn fetch. Nu kan ik veel sneller en makkelijker aangeven dat de de landen of het aantal objecten wil. 
+
+```
+.then(results => {
+        return results.map(result => {
+            return {
+                //in nummers gekregen dankzij Lennart
+                count: result.choCount.value,
+                land: result.landLabel.value,
+            }
+        })
+    })
+```
+
+Later in de code word er verwacht dat je in je array items hebt zitten met bepaalde eigenschappen/waardes. Om hier gebruik van te maken loop ik door mijn gefetchde array en maak ik met .map een nieuwe array met de nieuwe waardes. De "oude" waardes van de landen en het aantal objecten geef ik ook mee. (Zie field en country) Hier zie je de code: 
+```
+  var defaults = results.map(result => {
+       return {
+        title: "",                                               
+        field: result.count,
+        country: result.land,
+        colors: "RdYlGn",
+        proj: "kavrayskiy",
+        inverse: "",
+       }
+    });
+```
+De nieuwe array ziet er in de console nu zo uit:
+![Schermafbeelding 2019-11-14 om 21 02 30](https://user-images.githubusercontent.com/45541885/68892221-c5fa0200-0722-11ea-8a4b-416142a98faf.png)
+
+#### Aangepaste query
+
 
 ## features
 
