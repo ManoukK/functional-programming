@@ -93,7 +93,7 @@ De nieuwe array ziet er in de console nu zo uit:
 
 ## features
 Dit zijn de features die ik nog wil toepassen of die ik al heb toegepast:
-[]
+- [ ] f444
 
 ## Credits voor:
 #### conpect hulp:
