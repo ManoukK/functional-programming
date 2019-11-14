@@ -91,9 +91,15 @@ Later in de code word er verwacht dat je in je array items hebt zitten met bepaa
 De nieuwe array ziet er in de console nu zo uit:
 ![Schermafbeelding 2019-11-14 om 21 02 30](https://user-images.githubusercontent.com/45541885/68892221-c5fa0200-0722-11ea-8a4b-416142a98faf.png)
 
+#### Lege data 
+In principe werk ik niet met lege data maar wel met "lege" landen. Landen die geen objecten bevatten. Die landen wil ik laten tonen door een witte kleur, dus eigenlijk geen kleur te geven. Dit wil ik doen omdat het in landkaarten in combinatie met kleur wit vaak leeg betekend en op deze manier kan je ook goed zien welke landen geen objecten bevatten. De lege landen vertellen namelijk ook een verhaal en het lijkt mij heel interessant om het contrast te zien tussen landen zonder objecten en landen met enorm veel objecten. 
+
 ## features
 Dit zijn de features die ik nog wil toepassen of die ik al heb toegepast:
-- [ ] f444
+- [ ] Landen die een kleur hebben op basis van het aantal objecten uit dat land
+- [ ] Pop-up met de naam van het land en het aantal objecten als je erover hovert
+- [ ] Betere query schrijven die alle objecten ophaalt en dan sorteert op landen
+- [ ] (interactie) klikken op een land en dan verschillende objecten uit dat land te zien krijgen 
 
 ## Credits voor:
 #### conpect hulp:
