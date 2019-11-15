@@ -9,6 +9,7 @@ sheight = 550;
 // rotating = false;
 
 //query geschreven in sparql
+//zelf toegevoegd 
 var query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX dct: <http://purl.org/dc/terms/>
@@ -76,7 +77,7 @@ fetchAsync;
 
 //hier eindigt de fetch
 
-
+//deze function is van het template ik heb er wel voor gezorgd dat mijn query results erin verwerkt zijn
 function nextFunction(results, o,){
 
     // //hier trek ik mijn array los met alleen de landen en alleen counts als strings (dankzij Lennart!)
@@ -88,6 +89,9 @@ function nextFunction(results, o,){
 
     // console.log(results.result);
 
+    //dit was eerst een "normale" var en heb ik omgezet zodat mijn array 
+    //er doorheen loopt en deze waardes meekrijgt zodat het door kan om 
+    //de kaart te maken
    var defaults = results.map(result => {
        return {
         title: "",                                               
@@ -170,15 +174,14 @@ function nextFunction(results, o,){
 
     //Via field(aantal objecten) aangeven wat de domain en range is via kleuren en waardes
     data = defaults.map(function(d) {
-        //console.log(d)
-        //console.log(d.field)
-        d[field] = (d[field] === undefined || isNaN(+d[field])) ? null : +d[field];
+        //kleur probleem opgelost want ik moest field tussen haakjes zetten
+        d["field"] = (d["field"] === undefined || isNaN(+d["field"])) ? null : +d["field"];
         return d;
         }).filter(function(d) {
-            return d[field] !== null;
+            return d["field"] !== null;
         });
 
-    var datadomain = d3.extent(defaults.map(function(legenda) { return legenda[field]; })),
+    var datadomain = d3.extent(defaults.map(function(legenda) { return legenda["field"]; })),
         colors = d3.scale.quantize()
             .domain(opts.inverse ? [datadomain[1], datadomain[0]] : datadomain)
             .range(["#ff78cb", "#f295cd", "#e2adce", "#d0c3d0", "#bad8d1", "#9fecd3", "#78ffd4"]);
@@ -289,7 +292,7 @@ function loaded(err, world, countrydb) {
             .attr("class", "country foreground")
             .attr("d", path)
             .style("fill", function(landKleurenFill, i) {
-                return (landKleurenFill.properties["_data"] && landKleurenFill.properties["_data"][field] !== null) ? colors(landKleurenFill.properties["_data"][field]) : '#f8f8f8';
+                return (landKleurenFill.properties["_data"] && landKleurenFill.properties["_data"]["field"] !== null) ? colors(landKleurenFill.properties["_data"]["field"]) : '#f8f8f8';
             })
             //hier zit de animatie in met het hoveren
             .on("mouseover", function(popup) {
@@ -299,6 +302,7 @@ function loaded(err, world, countrydb) {
                 .style("opacity", 0.9);
                 
                 //wat zit er in de popup
+                //probleem show count opgelost de field's moesten tussen haakjes
                 var str = popup.properties["_country"] ? popup.properties["_country"].name : "Unknown";
                 str += (popup.properties["_data"] && popup.properties["_data"]["field"] !== null) ? ": " + popup.properties["_data"]["field"] : "";
                 tooltip.html(str)
