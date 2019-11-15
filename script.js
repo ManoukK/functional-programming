@@ -8,16 +8,7 @@ sheight = 550;
 // var speed = 1.0,s
 // rotating = false;
 
-// var defaults= {
-// title: "",                                               
-// field: "choCount",
-// country: "landLabel",
-// colors: "RdYlGn",
-// proj: "kavrayskiy",
-// inverse: ""
-// };
-
-
+//query geschreven in sparql
 var query = `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX dc: <http://purl.org/dc/elements/1.1/>
 PREFIX dct: <http://purl.org/dc/terms/>
@@ -110,15 +101,17 @@ function nextFunction(results, o,){
 
     console.log(defaults);
 
-
+    //hier staat waar opts vandaan komt
     var opts = $.extend({}, defaults, o),
         colorscale = opts.colors,
         field = opts.field;
 
+    //kleuren schaal aangeven
     if (colorbrewer[colorscale] === undefined) {
      colorscale = "RdYlGn";
     }
 
+    //de waardes instellen voor de wereld kaart
     var ortho = d3.geo.orthographic()
         .precision(.5)
         .translate([width / 2, height / 2])
@@ -127,8 +120,10 @@ function nextFunction(results, o,){
         .scale(250)
         .rotate([-80, -10]);
 
+    // een "soort" wereld kaart met over het algemeen weinig vervorming (zie https://en.wikipedia.org/wiki/Kavrayskiy_VII_projection)
     var kavrayskiy = d3.geo.kavrayskiy7();
 
+    //de lijnen die je op de wereld kaart ziet 
     var graticule = d3.geo.graticule();
 
     var projections = {
@@ -149,6 +144,7 @@ function nextFunction(results, o,){
     var path = d3.geo.path()
         .projection(projection);
 
+    //svg staat in html in een div met als id container
     var svg = d3.select("#container").append("svg")
         .attr("width", width)
         .attr("height", sheight);
@@ -172,6 +168,7 @@ function nextFunction(results, o,){
         .attr("class", "outline foreground")
         .attr("d", path);
 
+    //Via field(aantal objecten) aangeven wat de domain en range is via kleuren en waardes
     data = defaults.map(function(d) {
         //console.log(d)
         //console.log(d.field)
@@ -206,16 +203,18 @@ function nextFunction(results, o,){
         tf = ".1f";
     }
     
+    //stijl van de legenda onder de wereld kaart
     var xAxis = d3.svg.axis()
         .orient("bottom")
         .scale(legenda)
-        .tickSize(13)
+        .tickSize(15)
         .tickFormat(d3.format(tsign + tf));
 
     var xbar = svg.append("g")
         .attr("transform", "translate(" + (width / 2 - 120) + "," + (sheight - 30) + ")")
         .attr("class", "key");
 
+    //hoe de legenda is opgedeelt in waardes
     xbar.selectAll("rect")
         .data(d3.pairs(legenda.ticks(10)))
         .enter().append("rect")
@@ -230,20 +229,22 @@ function nextFunction(results, o,){
         .attr("x", legenda(legenda.ticks(10)[0]))
         .text(opts.title);
 
-    
+    //anden en de wereld kaart word geladen als mijn query is geladen en als alles goed is gegaan
     queue()
         .defer(d3.json, "https://pigshell.com/common/d3.v3/world-110m.json")
         .defer(d3.json, "https://pigshell.com/common/d3.v3/countries.json")
         .await(loaded);
 
-//hier word csv getransformeerd en worden er locaties aan gegeven
+//hier worden er locaties aan gegeven
 function loaded(err, world, countrydb) {
     
     console.log("test")
 
+    //hier worden de landen opgehaald
     var countries = topojson.feature(world, world.objects.countries).features;
 
     //Hier was een error die kim heeft gefixt (data.map moets results.map worden)
+    //Hier wandelt de array door de if'jes heen en berekend de namen en de locaties 
     data = defaults.map(function(land) {
         var naamLand = land.country;
     
@@ -267,40 +268,44 @@ function loaded(err, world, countrydb) {
             } else {
                 land["_id"] = -1;
             }
+            console.log(land)
             return land;
         });
 
+
+        //hier worden de landen en counts aan elkaar gelinkt zodat het in de popup komt en de kleuren worden aangepast
         countries = countries.map(function(naamLand) {
-            //console.log(naamLand)
-            naamLand.properties["_data"] = defaults.filter(function(landNaamOmzetten) { return landNaamOmzetten["field"] === naamLand.field; })[0];
+            console.log(naamLand)
+            naamLand.properties["_data"] = defaults.filter(function(landNaamOmzetten) { return landNaamOmzetten["_id"] === naamLand.id; })[0];
             naamLand.properties["_country"] = countrydb.filter(function(landNaamOmzetten) { return +landNaamOmzetten["ccn3"] === naamLand.id; })[0];
-            // console.log(naamLand)
+
             return naamLand;
         });
 
-        //hier zit de animatie in met het hoveren
+        //hier worden er kleuren in de landen gezet aan de hand van het aantal counts
         svg.selectAll(".country")
             .data(countries)
             .enter().insert("path", ".outline")
             .attr("class", "country foreground")
             .attr("d", path)
             .style("fill", function(landKleurenFill, i) {
-                console.log(landKleurenFill)
-                //console.log(landKleurenFill.properties["_data"])
                 return (landKleurenFill.properties["_data"] && landKleurenFill.properties["_data"][field] !== null) ? colors(landKleurenFill.properties["_data"][field]) : '#f8f8f8';
             })
+            //hier zit de animatie in met het hoveren
             .on("mouseover", function(popup) {
                 console.log(str)
                 tooltip.transition()
                 .duration(200)
                 .style("opacity", 0.9);
                 
+                //wat zit er in de popup
                 var str = popup.properties["_country"] ? popup.properties["_country"].name : "Unknown";
-                str += (popup.properties["_data"] && popup.properties["_data"][field] !== null) ? ": " + popup.properties["_data"][field] : "";
+                str += (popup.properties["_data"] && popup.properties["_data"]["field"] !== null) ? ": " + popup.properties["_data"]["field"] : "";
                 tooltip.html(str)
                     .style("left", (d3.event.pageX) + "px")
                     .style("top", (d3.event.pageY - 30) + "px");
             })
+            //hier gaat de animatie weer weg 
             .on("mouseout", function(popupWeg) {
                 tooltip.transition()
                 .duration(500)
@@ -321,6 +326,8 @@ function loaded(err, world, countrydb) {
                     d3.event.sourceEvent.preventDefault();
                     svg.selectAll("path").attr("d", path);
                 }));
+                
+        ////Hier kan je de kaart laten draaien
         // d3.timer(function() {
         //     if (!rotating) {
         //         return;
@@ -330,6 +337,7 @@ function loaded(err, world, countrydb) {
         //     svg.selectAll("path").attr("d", path);
         // });
     }
+    //dit toont de kaart op het scherm 
     if (window.parent !== window) {
         var myheight = document.documentElement.scrollHeight || document.body.scrollHeight;
         window.parent.postMessage({height: myheight}, '*');
