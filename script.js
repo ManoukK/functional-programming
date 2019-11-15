@@ -97,7 +97,7 @@ function nextFunction(results, o,){
         title: "",                                               
         field: result.count,
         country: result.land,
-        colors: "RdYlGn",
+        // colors: "RdYlGn",
         proj: "kavrayskiy",
         inverse: "",
        }
@@ -111,9 +111,9 @@ function nextFunction(results, o,){
         field = opts.field;
 
     //kleuren schaal aangeven
-    if (colorbrewer[colorscale] === undefined) {
-     colorscale = "RdYlGn";
-    }
+    // if (colorbrewer[colorscale] === undefined) {
+    //  colorscale = "RdYlGn";
+    // }
 
     //de waardes instellen voor de wereld kaart
     var ortho = d3.geo.orthographic()
@@ -184,6 +184,7 @@ function nextFunction(results, o,){
     var datadomain = d3.extent(defaults.map(function(legenda) { return legenda["field"]; })),
         colors = d3.scale.quantize()
             .domain(opts.inverse ? [datadomain[1], datadomain[0]] : datadomain)
+            //eigen kleuren toegepast om te testen
             .range(["#ff78cb", "#f295cd", "#e2adce", "#d0c3d0", "#bad8d1", "#9fecd3", "#78ffd4"]);
 
     var legenda = d3.scale.linear()
@@ -271,7 +272,7 @@ function loaded(err, world, countrydb) {
             } else {
                 land["_id"] = -1;
             }
-            console.log(land)
+            //console.log(land)
             return land;
         });
 
