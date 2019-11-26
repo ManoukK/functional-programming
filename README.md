@@ -116,7 +116,7 @@ In principe werk ik niet met lege data maar wel met "lege" landen. Landen die ge
 ## features
 Dit zijn de features die ik nog wil toepassen of die ik al heb toegepast:
 - [ ] Landen die een kleur hebben op basis van het aantal objecten uit dat land
-- [ ] Pop-up met de naam van het land en het aantal objecten als je erover hovert
+- [x] Pop-up met de naam van het land en het aantal objecten als je erover hovert
 - [ ] Betere query schrijven die alle objecten ophaalt en dan sorteert op landen
 - [ ] (interactie) klikken op een land en dan verschillende objecten uit dat land te zien krijgen 
 
